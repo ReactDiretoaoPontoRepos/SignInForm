@@ -1,27 +1,77 @@
-import React from "react";
+import { useState } from "react";
+import { signIn } from "../../services/api";
+
 import "./styles.scss";
 
 const SignInForm = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  const handleFormSubmit = async (event) => {
+    event.preventDefault();
+
+    setIsLoading(true);
+
+    try {
+      await signIn({ username, password });
+      setError("");
+      setIsSignedIn(true);
+    } catch (error) {
+      setError("Usuário os senha inválidos");
+    }
+
+    setIsLoading(false);
+  };
+
   return (
     <main>
-      <form>
-        <h1>Autenticação</h1>
-        <p className="error">Usuário os senha inválido</p>
+      {isSignedIn ? (
+        <>
+          <h1> Olá {username}</h1>
+          <button
+            onClick={() => {
+              setIsSignedIn(false);
+              setUsername("");
+              setPassword("");
+            }}
+          >
+            Sair
+          </button>
+        </>
+      ) : (
+        <form onSubmit={handleFormSubmit}>
+          <h1>Autenticação</h1>
 
-        <label>
-          <p> Nome de usuário</p>
-          <input type="" />
-        </label>
+          {error && <p className="error">{error}</p>}
 
-        <label>
-          <p>Senha</p>
-          <input password="" />
-        </label>
+          <label>
+            <p> Nome de usuário</p>
+            <input
+              type="text"
+              value={username}
+              onChange={({ target }) => setUsername(target.value)}
+            />
+          </label>
 
-        <footer>
-          <button type="submit">Entrar</button>
-        </footer>
-      </form>
+          <label>
+            <p>Senha</p>
+            <input
+              type="password"
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+            />
+          </label>
+
+          <footer>
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? "Autenticando..." : "Entrar"}
+            </button>
+          </footer>
+        </form>
+      )}
     </main>
   );
 };
