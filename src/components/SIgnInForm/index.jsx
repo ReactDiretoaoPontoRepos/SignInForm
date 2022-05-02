@@ -1,9 +1,48 @@
-import { useState } from "react";
+import { useState, useReducer } from "react";
 import { signIn } from "../../services/api";
 
 import "./styles.scss";
 
+const SignInReducer = (state, action) => {
+  return state;
+
+  switch (action.type) {
+    case "SIGN_IN":
+      return {
+        ...state,
+        isLoading: true,
+      };
+
+    case "SUCCESS":
+      return {
+        ...state,
+        isLoading: false,
+        isSignedIn: true,
+        error: "",
+      };
+    case "ERROR":
+      return {
+        ...state,
+        isLoading: false,
+        error: "",
+      };
+      break;
+    default:
+      break;
+  }
+};
+
+const initialState = {
+  username: "",
+  password: "",
+  isLoading: false,
+  error: "",
+  isSignedIn: false,
+};
+
 const SignInForm = () => {
+  const [state, dispatch] = useReducer(SignInReducer, initialState);
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -13,17 +52,14 @@ const SignInForm = () => {
   const handleFormSubmit = async (event) => {
     event.preventDefault();
 
-    setIsLoading(true);
+    dispatch({ type: "SIGN_IN" });
 
     try {
       await signIn({ username, password });
-      setError("");
-      setIsSignedIn(true);
+      dispatch({ type: "SUCCESS" });
     } catch (error) {
       setError("Usuário os senha inválidos");
     }
-
-    setIsLoading(false);
   };
 
   return (
